@@ -1,0 +1,2 @@
+# odoo-hacks
+Odoo hacks
