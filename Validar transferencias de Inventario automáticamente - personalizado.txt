@@ -1,0 +1,17 @@
+# Buscar TODAS las órdenes de venta confirmadas
+sale_orders = env['sale.order'].search([('state', '=', 'sale')])
+
+for sale in sale_orders:
+    # Buscar entregas en estado "assigned" (Ready) que correspondan a la orden de venta
+    pickings = env['stock.picking'].search([
+        ('origin', 'like', sale.name),  # Relaciona con el Documento Origen
+        ('state', '=', 'assigned'),  # Solo procesar entregas en "Ready"
+    ])
+
+    for picking in pickings:
+        try:
+            picking.button_validate()  # Validar la transferencia (descuenta stock)
+            env.cr.commit()  # Guardar los cambios
+
+        except Exception as e:
+            picking.message_post(body=f"Error al validar entrega {picking.name}: {str(e)}")
